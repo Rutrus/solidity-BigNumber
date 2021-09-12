@@ -1,4 +1,5 @@
-pragma solidity >=0.4.20 <0.6;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
 import "./BigNumber.sol";
 

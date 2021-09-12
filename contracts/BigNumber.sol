@@ -1,4 +1,5 @@
-pragma solidity >=0.4.20 <0.6;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
 library BigNumber {
     
@@ -536,7 +537,7 @@ library BigNumber {
             // Total size of input = 96+base.length+exp.length+mod.length
             size := add(size,ml)
             // Invoke contract 0x5, put return value right after mod.length, @ +96
-            success := staticcall(sub(gas, 1350), 0x5, freemem, size, add(96,freemem), ml)
+            success := staticcall(sub(gas(), 1350), 0x5, freemem, size, add(96,freemem), ml)
 
             switch success case 0 { invalid() } //fail where we haven't enough gas to make the call
 
