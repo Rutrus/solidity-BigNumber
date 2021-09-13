@@ -456,8 +456,15 @@ library BigNumber {
         //get bitlen of result (TODO: optimise. we know bitlen is in the same byte as the modulus bitlen byte)
         uint bitlen;
         assembly { bitlen := mload(add(_result,0x20))}
+        unchecked {
+            bitlen = get_word_length(bitlen) + (((_result.length/32)-1)*256); 
         bitlen = get_word_length(bitlen) + (((_result.length/32)-1)*256); 
-
+            bitlen = get_word_length(bitlen) + (((_result.length/32)-1)*256); 
+        bitlen = get_word_length(bitlen) + (((_result.length/32)-1)*256); 
+            bitlen = get_word_length(bitlen) + (((_result.length/32)-1)*256); 
+        bitlen = get_word_length(bitlen) + (((_result.length/32)-1)*256); 
+            bitlen = get_word_length(bitlen) + (((_result.length/32)-1)*256); 
+        }
         result.val = _result;
         result.neg = (base.neg==false || base.neg && is_odd(exponent)==0) ? false : true; //TODO review this. 
         result.bitlen = bitlen;
@@ -810,19 +817,20 @@ library BigNumber {
             result_ptr := add(mload(dividend), length)   
         }
 
-        for(uint i= length-32; i<max;i-=32){                 //for each word:
-            assembly{
-                word_shifted := mload(result_ptr)               //get next word
-                switch eq(i,0)                               //if i==0:
-                case 1 { mask := 0 }                         // handles msword: no mask needed.
-                default { mask := mload(sub(result_ptr,0x20)) } // else get mask.
+        unchecked {
+            for(uint i= length-32; i<max;i-=32){                 //for each word:
+                assembly{
+                    word_shifted := mload(result_ptr)               //get next word
+                    switch eq(i,0)                               //if i==0:
+                    case 1 { mask := 0 }                         // handles msword: no mask needed.
+                    default { mask := mload(sub(result_ptr,0x20)) } // else get mask.
+                }
+                word_shifted >>= value;                            //right shift current by value
+                mask <<= mask_shift;                               // left shift next significant word by mask_shift
+                assembly{ mstore(result_ptr, or(word_shifted,mask)) } // store OR'd mask and shifted value in-place
+                result_ptr-=32;                                       // point to next value.
             }
-            word_shifted >>= value;                            //right shift current by value
-            mask <<= mask_shift;                               // left shift next significant word by mask_shift
-            assembly{ mstore(result_ptr, or(word_shifted,mask)) } // store OR'd mask and shifted value in-place
-            result_ptr-=32;                                       // point to next value.
         }
-
         assembly{
             //the following code removes any leading words containing all zeroes in the result.
             result_ptr := add(result_ptr,0x20)
@@ -909,5 +917,3 @@ library BigNumber {
     }
 
 }
-
-
